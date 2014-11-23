@@ -147,7 +147,28 @@ GtkWidget* kahash_window_log_create()
 
 GtkWidget* kahash_window_key_create()
 {
-	GtkWidget *tree = gtk_tree_view_new();
+	GtkTreeViewColumn *column;
+	GtkCellRenderer *render;
+	GtkWidget *tree;
+	GtkListStore *store;
+	
+	tree = gtk_tree_view_new();
+	
+	// id
+	render = gtk_cell_renderer_text_new();	
+	column = gtk_tree_view_column_new_with_attributes("Id", render, "text", KEY_ID, NULL);
+	gtk_tree_view_insert_column(GTK_TREE_VIEW(tree), column, -1);
+	
+	// name
+	render = gtk_cell_renderer_text_new();	
+	column = gtk_tree_view_column_new_with_attributes("Name", render, "text", KEY_NAME, NULL);
+	gtk_tree_view_insert_column(GTK_TREE_VIEW(tree), column, -1);
+	
+	store = gtk_list_store_new(LOG_NUM, G_TYPE_STRING, G_TYPE_STRING);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	
+	g_object_unref(store);
+	
 	return tree;
 }
 
@@ -253,17 +274,23 @@ void cb_toolbar_home(GtkWidget *widget, gpointer data)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(size_entry), 1);
 	gtk_grid_attach(GTK_GRID(grid), size_entry, 2, 2, 1, 1);
 	
-	// add button
-	GtkWidget *button_box, *button_add;
-	GtkWidget *icon_add;
+	// buttonbox
+	GtkWidget *button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_grid_attach(GTK_GRID(grid), button_box, 1, 3, 2, 1);
 	
-	button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	button_add = gtk_button_new();
-	icon_add = gtk_image_new_from_stock(GTK_STOCK_ADD, GTK_ICON_SIZE_BUTTON);
-	
+	// add
+	GtkWidget *button_add = gtk_button_new();
+	gtk_widget_set_tooltip_text(button_add, "Make and add");
+	GtkWidget *icon_add = gtk_image_new_from_stock(GTK_STOCK_ADD, GTK_ICON_SIZE_BUTTON);
 	gtk_button_set_image(GTK_BUTTON(button_add), icon_add);
 	gtk_box_pack_start(GTK_BOX(button_box), button_add, FALSE, FALSE, 5);
-	gtk_grid_attach(GTK_GRID(grid), button_box, 1, 3, 1, 1);
+	
+	// generate
+	GtkWidget *button_generate = gtk_button_new();
+	gtk_widget_set_tooltip_text(button_generate, "Generate password");
+	GtkWidget *icon_generate = gtk_image_new_from_stock(GTK_STOCK_EXECUTE, GTK_ICON_SIZE_BUTTON);
+	gtk_button_set_image(GTK_BUTTON(button_generate), icon_generate);
+	gtk_box_pack_start(GTK_BOX(button_box), button_generate, FALSE, FALSE, 5);
 	
 	// endcontent 
 	

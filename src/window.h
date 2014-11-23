@@ -24,6 +24,7 @@ struct _widgets
 
 enum { MSG_TIME=0, MSG_TXT, MSG_NUM };
 enum { LOG_TXT=0, LOG_NUM };
+enum { KEY_ID=0, KEY_NAME, KEY_NUM };
 
 gint kahash_window_build(struct _widgets *widgets);
 void kahash_window_toolbar_build(struct _widgets *widgets);
