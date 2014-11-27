@@ -9,7 +9,8 @@ gint kahash_window_build(struct _widgets *widgets)
 	widgets->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(widgets->window), APP_NAME);
 	gtk_widget_set_size_request(widgets->window, 300, 500);
-	//gtk_window_set_resizable(GTK_WINDOW(widgets->window), FALSE);
+	gtk_window_set_position(GTK_WINDOW(widgets->window), GTK_WIN_POS_CENTER);
+	gtk_window_set_resizable(GTK_WINDOW(widgets->window), FALSE);
 	g_signal_connect(widgets->window, "destroy", G_CALLBACK(cb_window_destroy), widgets);
 	
 	// grid
@@ -29,7 +30,7 @@ gint kahash_window_build(struct _widgets *widgets)
 	widgets->statusbar = gtk_statusbar_new();
 	gtk_grid_attach(GTK_GRID(grid), widgets->statusbar, 0, 2, 1, 1);
 	
-	send_to_log(widgets->log_in_view, g_strdup_printf("%s %s\n%s", APP_NAME, APP_VERSION, APP_BUILD));
+	kahash_window_send_to_log(widgets->log_in_view, g_strdup_printf("%s %s\n%s", APP_NAME, APP_VERSION, APP_BUILD));
 	
 	return EXIT_SUCCESS;
 }
@@ -172,7 +173,7 @@ GtkWidget* kahash_window_key_create()
 	return tree;
 }
 
-void send_to_log(GtkWidget *view, gchar *message)
+void kahash_window_send_to_log(GtkWidget *view, gchar *message)
 {
 	GtkListStore *store;
 	GtkTreeIter iter;
@@ -249,30 +250,31 @@ void cb_toolbar_home(GtkWidget *widget, gpointer data)
 	
 	// name
 	GtkWidget *name_label = gtk_label_new("Name:");
-	gtk_label_set_width_chars(GTK_LABEL(name_label), 10);
+	gtk_label_set_width_chars(GTK_LABEL(name_label), 20);
 	gtk_grid_attach(GTK_GRID(grid), name_label, 1, 0, 1, 1);
 	
-	GtkWidget *name_entry = gtk_entry_new();
-	gtk_grid_attach(GTK_GRID(grid), name_entry, 2, 0, 1, 1);
+	widgets->entry_name = gtk_entry_new();
+	gtk_grid_attach(GTK_GRID(grid), widgets->entry_name, 2, 0, 1, 1);
 	
 	// password
 	GtkWidget *password_label = gtk_label_new("Password:");
 	gtk_grid_attach(GTK_GRID(grid), password_label, 1, 1, 1, 1);
 	
-	GtkWidget *password_entry = gtk_entry_new();
-	gtk_grid_attach(GTK_GRID(grid), password_entry, 2, 1, 1, 1);
+	widgets->entry_password = gtk_entry_new();
+	gtk_entry_set_width_chars(GTK_ENTRY(widgets->entry_password), 32);
+	gtk_grid_attach(GTK_GRID(grid), widgets->entry_password, 2, 1, 1, 1);
 	
 	// size
 	GtkWidget *size_label = gtk_label_new("Size:");
 	gtk_grid_attach(GTK_GRID(grid), size_label, 1, 2, 1, 1);
 	
-	GtkWidget *size_entry = gtk_combo_box_text_new();
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(size_entry), NULL, "512");
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(size_entry), NULL, "1024");
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(size_entry), NULL, "2048");
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(size_entry), NULL, "4096");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(size_entry), 1);
-	gtk_grid_attach(GTK_GRID(grid), size_entry, 2, 2, 1, 1);
+	widgets->entry_size = gtk_combo_box_text_new();
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "512");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "1024");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "2048");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "4096");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(widgets->entry_size), 1);
+	gtk_grid_attach(GTK_GRID(grid), widgets->entry_size, 2, 2, 1, 1);
 	
 	// buttonbox
 	GtkWidget *button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
@@ -288,6 +290,8 @@ void cb_toolbar_home(GtkWidget *widget, gpointer data)
 	// generate
 	GtkWidget *button_generate = gtk_button_new();
 	gtk_widget_set_tooltip_text(button_generate, "Generate password");
+	g_signal_connect(button_generate, "clicked", G_CALLBACK(cb_password_generation), widgets);
+	
 	GtkWidget *icon_generate = gtk_image_new_from_stock(GTK_STOCK_EXECUTE, GTK_ICON_SIZE_BUTTON);
 	gtk_button_set_image(GTK_BUTTON(button_generate), icon_generate);
 	gtk_box_pack_start(GTK_BOX(button_box), button_generate, FALSE, FALSE, 5);
@@ -314,4 +318,17 @@ void cb_toolbar_home(GtkWidget *widget, gpointer data)
 
 void cb_toolbar_preference(GtkWidget *widget, gpointer data)
 {
+}
+
+void cb_password_generation(GtkWidget *widget, gpointer data)
+{
+	struct _widgets *widgets = data;
+	gchar *password;
+	
+	password = g_malloc0(32);
+	
+	kahash_core_random_string(password, 32);
+	gtk_entry_set_text(GTK_ENTRY(widgets->entry_password), password);
+	
+	g_free(password);
 }

@@ -20,6 +20,10 @@ struct _widgets
 	GtkWidget *message_of_input;
 	GtkWidget *log_in_view;
 	GtkWidget *key_store_view;
+	
+	GtkWidget *entry_password;
+	GtkWidget *entry_name;
+	GtkWidget *entry_size;
 };
 
 enum { MSG_TIME=0, MSG_TXT, MSG_NUM };
@@ -34,12 +38,13 @@ GtkWidget* kahash_window_notebook_build_page2(struct _widgets *widgets);
 GtkWidget* kahash_window_notebook_build_page3(struct _widgets *widgets);
 GtkWidget* kahash_window_log_create();
 GtkWidget* kahash_window_key_create();
-void send_to_log(GtkWidget *view, gchar *message);
+void kahash_window_send_to_log(GtkWidget *view, gchar *message);
 
 // cb
 void cb_window_destroy(GtkWidget *widget, gpointer data);
 void cb_toolbar_about(GtkWidget *widget, gpointer data);
 void cb_toolbar_home(GtkWidget *widget, gpointer data);
 void cb_toolbar_preference(GtkWidget *widget, gpointer data);
+void cb_password_generation(GtkWidget *widget, gpointer data);
 
 #endif

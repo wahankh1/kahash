@@ -9,6 +9,8 @@ gint kahash_core_initialize()
 	
 	gtk_init(NULL, NULL);
 	
+	kahash_core_initialize_random();
+	
 	// build
 	if(kahash_window_build(&widgets) == EXIT_FAILURE)
 	{
@@ -24,4 +26,17 @@ gint kahash_core_initialize()
 
 void kahash_core_initialize_random()
 {
+	guint32 seed;
+	
+	seed = g_random_int_range(0, G_MAXUINT32);
+	
+	srand(seed);
+}
+
+void kahash_core_random_string(gchar *string, gint length)
+{
+	while(length--)
+	{
+		string[length] = rand() % 94 + 33;
+	}
 }

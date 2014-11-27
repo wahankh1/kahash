@@ -17,5 +17,6 @@
 
 gint kahash_core_initialize();
 void kahash_core_initialize_random();
+void kahash_core_random_string(gchar *string, gint length);
 
 #endif
