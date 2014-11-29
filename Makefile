@@ -7,7 +7,7 @@
 TARGET=kahash
 
 CC=gcc
-CFLAGS=-Wall -I. `pkg-config --cflags --libs glib-2.0 gtk+-3.0`
+CFLAGS=-Wall -I. -lcrypto -lssl `pkg-config --cflags --libs glib-2.0 gtk+-3.0`
 
 SRC:=$(wildcard src/*.c)
 OBJ:=$(SRC:src/%.c=obj/%.o)
@@ -16,6 +16,7 @@ $(TARGET): $(OBJ)
 	$(CC) -o $@ $(CFLAGS) $(OBJ)
 	
 $(OBJ) : obj/%.o : src/%.c
+	mkdir -p obj
 	$(CC) $(CFLAGS) -c $< -o $@
 	
 .PHONY: clean

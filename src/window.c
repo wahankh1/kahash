@@ -30,7 +30,7 @@ gint kahash_window_build(struct _widgets *widgets)
 	widgets->statusbar = gtk_statusbar_new();
 	gtk_grid_attach(GTK_GRID(grid), widgets->statusbar, 0, 2, 1, 1);
 	
-	kahash_window_send_to_log(widgets->log_in_view, g_strdup_printf("%s %s\n%s", APP_NAME, APP_VERSION, APP_BUILD));
+	kahash_window_send_to_log(widgets->log_in_view, g_strdup_printf("%s %s%s", APP_NAME, APP_VERSION, APP_BUILD));
 	
 	return EXIT_SUCCESS;
 }
@@ -42,9 +42,9 @@ void kahash_window_toolbar_build(struct _widgets *widgets)
 	gtk_toolbar_set_style(GTK_TOOLBAR(widgets->toolbar), GTK_TOOLBAR_ICONS);
 	
 	// home
-	widgets->toolbar_btn_home = gtk_tool_button_new_from_stock(GTK_STOCK_HOME);
-	gtk_toolbar_insert(GTK_TOOLBAR(widgets->toolbar), widgets->toolbar_btn_home, -1);
-	g_signal_connect(widgets->toolbar_btn_home, "clicked", G_CALLBACK(cb_toolbar_home), widgets);
+	widgets->toolbar_btn_add = gtk_tool_button_new_from_stock(GTK_STOCK_ADD);
+	gtk_toolbar_insert(GTK_TOOLBAR(widgets->toolbar), widgets->toolbar_btn_add, -1);
+	g_signal_connect(widgets->toolbar_btn_add, "clicked", G_CALLBACK(cb_toolbar_add), widgets);
 	
 	gtk_toolbar_insert(GTK_TOOLBAR(widgets->toolbar), gtk_separator_tool_item_new(), -1);
 	
@@ -70,25 +70,25 @@ void kahash_window_notebook_build(struct _widgets *widgets)
 	gtk_widget_set_vexpand(widgets->notebook, TRUE);
 	
 	// page one
-	notebook_page_one = kahash_window_notebook_build_page1(widgets);
+	notebook_page_one = kahash_window_notebook_build_messages(widgets);
 	notebook_page_one_label = gtk_label_new("Messages");
 	gtk_label_set_width_chars(GTK_LABEL(notebook_page_one_label), 10);
 	gtk_notebook_insert_page(GTK_NOTEBOOK(widgets->notebook), notebook_page_one, notebook_page_one_label, -1);
 	
 	// page two
-	notebook_page_two = kahash_window_notebook_build_page2(widgets);
+	notebook_page_two = kahash_window_notebook_build_options(widgets);
 	notebook_page_two_label = gtk_label_new("Options");
 	gtk_label_set_width_chars(GTK_LABEL(notebook_page_two_label), 10);
 	gtk_notebook_insert_page(GTK_NOTEBOOK(widgets->notebook), notebook_page_two, notebook_page_two_label, -1);
 	
 	// page three
-	notebook_page_three = kahash_window_notebook_build_page3(widgets);
+	notebook_page_three = kahash_window_notebook_build_log(widgets);
 	notebook_page_three_label = gtk_label_new("Log");
 	gtk_label_set_width_chars(GTK_LABEL(notebook_page_three_label), 10);
 	gtk_notebook_insert_page(GTK_NOTEBOOK(widgets->notebook), notebook_page_three, notebook_page_three_label, -1);
 }
 
-GtkWidget* kahash_window_notebook_build_page1(struct _widgets *widgets)
+GtkWidget* kahash_window_notebook_build_messages(struct _widgets *widgets)
 {
 	GtkWidget *grid = gtk_grid_new();
 	gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
@@ -110,13 +110,24 @@ GtkWidget* kahash_window_notebook_build_page1(struct _widgets *widgets)
 	return grid;
 }
 
-GtkWidget* kahash_window_notebook_build_page2(struct _widgets *widgets)
+GtkWidget* kahash_window_notebook_build_options(struct _widgets *widgets)
 {
 	GtkWidget *grid = gtk_grid_new();
+	gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+	
+	// key view
+	GtkWidget *scrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_set_vexpand(scrolled, TRUE);
+	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(scrolled), 250);
+	
+	widgets->key_store_view = kahash_window_key_create();
+	gtk_container_add(GTK_CONTAINER(scrolled), widgets->key_store_view);
+	gtk_grid_attach(GTK_GRID(grid), scrolled, 0, 0, 1, 1);
+	
 	return grid;
 }
 
-GtkWidget* kahash_window_notebook_build_page3(struct _widgets *widgets)
+GtkWidget* kahash_window_notebook_build_log(struct _widgets *widgets)
 {
 	GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 	
@@ -218,7 +229,7 @@ void cb_toolbar_about(GtkWidget *widget, gpointer data)
 	gtk_widget_destroy(dialog_about);
 }
 
-void cb_toolbar_home(GtkWidget *widget, gpointer data)
+void cb_toolbar_add(GtkWidget *widget, gpointer data)
 {
 	struct _widgets *widgets = data;
 	GtkWidget *dialog, *content;
@@ -234,39 +245,33 @@ void cb_toolbar_home(GtkWidget *widget, gpointer data)
 		GTK_RESPONSE_CLOSE,
 		NULL);
 		
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(widgets->notebook), 1);
+		
 	content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 	
 	// content
 	GtkWidget *grid = gtk_grid_new();
 	gtk_container_add(GTK_CONTAINER(content), grid);
 	
-	// key view
-	GtkWidget *scrolled = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(scrolled), 250);
-	
-	widgets->key_store_view = kahash_window_key_create();
-	gtk_container_add(GTK_CONTAINER(scrolled), widgets->key_store_view);
-	gtk_grid_attach(GTK_GRID(grid), scrolled, 0, 0, 1, 4);
-	
 	// name
 	GtkWidget *name_label = gtk_label_new("Name:");
 	gtk_label_set_width_chars(GTK_LABEL(name_label), 20);
-	gtk_grid_attach(GTK_GRID(grid), name_label, 1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_label, 0, 0, 1, 1);
 	
 	widgets->entry_name = gtk_entry_new();
-	gtk_grid_attach(GTK_GRID(grid), widgets->entry_name, 2, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), widgets->entry_name, 1, 0, 1, 1);
 	
 	// password
 	GtkWidget *password_label = gtk_label_new("Password:");
-	gtk_grid_attach(GTK_GRID(grid), password_label, 1, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), password_label, 0, 1, 1, 1);
 	
 	widgets->entry_password = gtk_entry_new();
 	gtk_entry_set_width_chars(GTK_ENTRY(widgets->entry_password), 32);
-	gtk_grid_attach(GTK_GRID(grid), widgets->entry_password, 2, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), widgets->entry_password, 1, 1, 1, 1);
 	
 	// size
 	GtkWidget *size_label = gtk_label_new("Size:");
-	gtk_grid_attach(GTK_GRID(grid), size_label, 1, 2, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), size_label, 0, 2, 1, 1);
 	
 	widgets->entry_size = gtk_combo_box_text_new();
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "512");
@@ -274,11 +279,11 @@ void cb_toolbar_home(GtkWidget *widget, gpointer data)
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "2048");
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widgets->entry_size), NULL, "4096");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widgets->entry_size), 1);
-	gtk_grid_attach(GTK_GRID(grid), widgets->entry_size, 2, 2, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), widgets->entry_size, 1, 2, 1, 1);
 	
 	// buttonbox
 	GtkWidget *button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_grid_attach(GTK_GRID(grid), button_box, 1, 3, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), button_box, 0, 3, 2, 1);
 	
 	// add
 	GtkWidget *button_add = gtk_button_new();

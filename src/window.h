@@ -11,7 +11,7 @@ struct _widgets
 	GtkWidget *window;
 	GtkWidget *toolbar;
 	GtkToolItem *toolbar_btn_about;
-	GtkToolItem *toolbar_btn_home;
+	GtkToolItem *toolbar_btn_add;
 	GtkToolItem *toolbar_btn_preference;
 	GtkWidget *notebook;
 	GtkWidget *statusbar;
@@ -33,9 +33,9 @@ enum { KEY_ID=0, KEY_NAME, KEY_NUM };
 gint kahash_window_build(struct _widgets *widgets);
 void kahash_window_toolbar_build(struct _widgets *widgets);
 void kahash_window_notebook_build(struct _widgets *widgets);
-GtkWidget* kahash_window_notebook_build_page1(struct _widgets *widgets);
-GtkWidget* kahash_window_notebook_build_page2(struct _widgets *widgets);
-GtkWidget* kahash_window_notebook_build_page3(struct _widgets *widgets);
+GtkWidget* kahash_window_notebook_build_messages(struct _widgets *widgets);
+GtkWidget* kahash_window_notebook_build_options(struct _widgets *widgets);
+GtkWidget* kahash_window_notebook_build_log(struct _widgets *widgets);
 GtkWidget* kahash_window_log_create();
 GtkWidget* kahash_window_key_create();
 void kahash_window_send_to_log(GtkWidget *view, gchar *message);
@@ -43,7 +43,7 @@ void kahash_window_send_to_log(GtkWidget *view, gchar *message);
 // cb
 void cb_window_destroy(GtkWidget *widget, gpointer data);
 void cb_toolbar_about(GtkWidget *widget, gpointer data);
-void cb_toolbar_home(GtkWidget *widget, gpointer data);
+void cb_toolbar_add(GtkWidget *widget, gpointer data);
 void cb_toolbar_preference(GtkWidget *widget, gpointer data);
 void cb_password_generation(GtkWidget *widget, gpointer data);
 

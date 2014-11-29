@@ -12,8 +12,20 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <openssl/rand.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+
 #include "common.h"
 #include "window.h"
+
+struct _kahash_key {
+	gchar *name;
+	gchar *password;
+};
 
 gint kahash_core_initialize();
 void kahash_core_initialize_random();
